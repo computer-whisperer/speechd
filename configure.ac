@@ -191,6 +191,50 @@ AC_SUBST([flite_basic])
 AC_SUBST([flite_kal])
 AS_IF([test $with_flite = "yes"], [output_modules="${output_modules} flite"])
 
+
+# check for mimic support
+AC_ARG_WITH([mimic],
+	[AS_HELP_STRING([--with-mimic], [include Mimic support])],
+	[],
+	[with_mimic=check])
+AS_IF([test $with_mimic != "no"],
+	[AC_CHECK_LIB([mimic], [mimic_init],
+		[mimic_basic="-lmimic"],
+		[AS_IF([test $with_mimic = "yes"],
+			[AC_MSG_FAILURE([libmimic is not available])])],
+		[-lm])
+	AC_CHECK_LIB([mimic_usenglish], [usenglish_init],
+		[mimic_basic="-lmimic_usenglish ${mimic_basic}"],
+		[AS_IF([test $with_mimic = "yes"],
+			[AC_MSG_FAILURE([libmimic_usenglish is not available])])],
+		[-lmimic -lm])
+	AC_CHECK_LIB([mimic_cmulex], [cmu_lex_init],
+		[mimic_basic="-lmimic_cmulex ${mimic_basic}"],
+		[AS_IF([test $with_mimic = "yes"],
+			[AC_MSG_FAILURE([libmimic_cmulex is not available])])],
+		[-lmimic -lm])
+	AC_CHECK_LIB([mimic_cmu_us_kal16], [register_cmu_us_kal16],
+		[with_mimic=yes;
+		mimic_kal="-lmimic_cmu_us_kal16";
+		AC_DEFINE([HAVE_REGISTER_CMU_US_KAL16], [1],
+			[Use cmu_register_us_kal16 to register the 16-bit voice.])],
+		[AC_CHECK_LIB([mimic_cmu_us_kal16], [register_cmu_us_kal],
+			[with_mimic=yes;
+			mimic_kal="-lmimic_cmu_us_kal16"],
+			[AC_CHECK_LIB([mimic_cmu_us_kal], [register_cmu_us_kal],
+				[with_mimic=yes;
+				flite_kal="-lmimic_cmu_us_kal"],
+				[AS_IF([test $with_mimic = "yes"],
+					[AC_MSG_FAILURE([no mimic voices found])])],
+				[$flite_basic -lm])],
+			[$flite_basic -lm])],
+		[$flite_basic -lm])])
+AM_CONDITIONAL([mimic_support], [test $with_mimic = "yes"])
+AC_SUBST([mimic_basic])
+AC_SUBST([mimic_kal])
+AS_IF([test $with_mimic = "yes"], [output_modules="${output_modules} flite"])
+
+
 # check for IBMTTS support
 AC_ARG_WITH([ibmtts],
 	[AS_HELP_STRING([--with-ibmtts], [include IBM TTS support])],

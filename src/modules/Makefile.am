@@ -69,6 +69,15 @@ sd_flite_LDADD = $(top_builddir)/src/common/libcommon.la \
 	$(common_LDADD)
 endif
 
+if mimic_support
+modulebin_PROGRAMS += sd_mimic
+sd_mimic_SOURCES = mimic.c $(audio_SOURCES) $(common_SOURCES)
+sd_mimic_LDADD = $(top_builddir)/src/common/libcommon.la \
+	$(audio_dlopen_modules) \
+	$(mimic_kal) $(mimic_basic) \
+	$(common_LDADD)
+endif
+
 if ibmtts_support
 modulebin_PROGRAMS += sd_ibmtts
 sd_ibmtts_SOURCES = ibmtts.c $(audio_SOURCES) $(common_SOURCES) \
